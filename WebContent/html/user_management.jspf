@@ -1,0 +1,131 @@
+<%
+	UserDao userDao = new UserDaoImpl();
+	
+	String firstName = (String) TSUtil.getAttribute(request, "fname", StringPool.BLANK);
+	String lastName = (String) TSUtil.getAttribute(request, "lname", StringPool.BLANK);
+	String email = (String) TSUtil.getAttribute(request, "email", StringPool.BLANK);
+	
+	List<User> userList = userDao.searchUser(firstName, lastName, email);
+	
+	boolean isSearchSuccess = (Boolean) TSUtil.getAttribute(request, "isSearchSuccess", true);
+	boolean isClickedSearchButton = (Boolean) TSUtil.getAttribute(request, "isClickedSearchButton", false);
+	
+	Account account = (Account) session.getAttribute("account");
+	MDC.put("AccId",account.getAccId());
+%>
+
+<div style="font-size: 2.5em;">
+	<div style="display: inline; text-align: left">
+		User Management
+	</div>
+	<a href="javascript:openAddUserDialog();" id="addUser" class="rightButton">Add User</a>
+	<hr>
+</div>
+
+<c:choose>
+	<c:when test="<%=isSearchSuccess && isClickedSearchButton%>">
+		<%@ include file="/html/message/successMessage.jspf"%>
+	</c:when>
+</c:choose>
+
+<form action="<%=TSConstants.TESTING_SYSTEM_SERVLET%>" method="POST" style="margin-bottom:15px">
+	<input type="hidden" name="<%=TSConstants.CMD%>" value="<%=TSConstants.SEARCH_USER%>"/>
+	<table>
+		<tr>
+			<td>First Name:</td>
+			<td><input type="text" name="fname" value="<%=firstName%>"/></td>
+		</tr>
+		<tr>
+			<td>Last Name:</td>
+			<td><input type="text" name="lname" value="<%=lastName%>"/></td>
+		</tr>
+		<tr>
+			<td>Email:</td>
+			<td><input type="text" name="email" value="<%=email%>"/></td>
+		</tr>
+	</table>
+	<button type="submit" value="Search" id="searchButton" style="margin-top: 20px">Search</button>
+</form>
+
+<hr>
+
+<c:choose>
+   	<c:when test="<%=userList.size() > 0 %>">
+		<div class="emphasisTable" style="margin-top: 20px" >
+		    <table id="one-column-emphasis" cellspacing="0" cellpadding="0" style="width: 1000px; font-size: 14px; border-bottom: 1px solid black;">
+		    	<thead style="background-color: #e8edff">
+		        <tr>
+		            <td>No.</td>
+		            <td>User ID</td>
+		            <td>First Name</td>
+		            <td>Last Name</td>
+		            <td>Email</td>
+		            <td>Actions</td>
+		        </tr>
+		        </thead>
+		        <tbody id="itemContainer">
+		        <c:set var="count" value="0"/>
+				<c:forEach items="<%=userList %>" var="user">
+					<tr>
+						<c:set var="count" value="${count + 1}"/>
+						<td>${count}.</td>
+						<td>${user.userId}</td>
+						<td>${user.fname}</td>
+						<td>${user.lname}</td>
+						<td>${user.email}</td>
+						
+						<c:url value="<%=TSConstants.TESTING_SYSTEM_SERVLET_URL_PATTERN%>" var="editUserURL">
+							<c:param name="tsTab" value="edit-user"/>
+							<c:param name="userId" value="${user.userId}"/>
+						</c:url>
+						
+						<c:url value="<%=TSConstants.TESTING_SYSTEM_SERVLET_URL_PATTERN%>" var="viewUserURL">
+							<c:param name="tsTab" value="user-details"/>
+							<c:param name="userId" value="${user.userId}"/>
+						</c:url>
+						
+						<td>
+							<a title="View details" href="${viewUserURL}"><img src="/TestingSystem/images/view_icon.png"/></a>
+							<a title="Edit" href="${editUserURL}"><img src="/TestingSystem/images/edit_icon.png"/></a>
+							<a title="Delete" onclick="deleteUser('${user.userId}')" href="javascript:;"><img src="/TestingSystem/images/delete_icon.png"/></a>
+						</td>
+		
+					</tr>
+				</c:forEach>
+				</tbody>
+		    </table>
+		    <div align="center" class="tableNavigation"></div>
+		</div>
+	</c:when>
+	<c:otherwise>
+		<div style="color: red">No users found!</div>
+	</c:otherwise>
+</c:choose>
+		
+<div style="height: 40px"></div>
+
+<div id="addUserDialog" title="Add User">
+	<div id="addUserResult" style="color: red"></div>
+	<table>
+		<tr>
+			<td>User ID:</td>
+			<td><input type="text" id="userId"></td>
+		</tr>
+		<tr>
+			<td>First name:</td>
+			<td><input type="text" id="firstName"></td>
+		</tr>
+		<tr>
+			<td>Last name:</td>
+			<td><input type="text" id="lastName"></td>
+		</tr>
+		<tr>
+			<td>Email:</td>
+			<td><input type="text" id="email"></td>
+		</tr>
+	</table>
+</div>
+
+<div id="deleteUserDialog" title="Delete User">
+	<span id="deleteUserMessage"></span>
+</div>

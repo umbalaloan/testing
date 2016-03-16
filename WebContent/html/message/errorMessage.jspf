@@ -1,0 +1,11 @@
+<%@page import="util.TSUtil"%>
+<link rel="stylesheet" type="text/css" href="<%=TSConstants.JQUERY_CSS%>"/>
+<%
+	final String errorMessage = (String) TSUtil.getAttribute(request, "errorMessage", "Failed to process your request!");
+%>
+<div class="ui-widget">
+	<div class="ui-state-error ui-corner-all" style="padding: 0 .7em;">
+		<p><span class="ui-icon ui-icon-alert" style="float: left; margin-right: .3em;"></span>
+		<strong>Error:&nbsp;</strong><%= errorMessage%></p>
+	</div>
+</div>
